@@ -1,0 +1,35 @@
+apiVersion: mgazza.github.com/v1alpha1
+kind: Connector
+metadata:
+  name: postgres-jdbc-sink
+config:
+  "connector.class": io.confluent.connect.jdbc.JdbcSinkConnector
+  "key.converter": org.apache.kafka.connect.storage.StringConverter
+  "value.converter": io.confluent.connect.json.JsonSchemaConverter
+  "tasks.max": "1"
+  "connection.url":
+    secretRef:
+      name: connectors
+      key: postgres_connection_string
+  "value.converter.schema.registry.url":
+    configMapRef:
+      name: connectors
+      key: schema_registry_url
+  "topics": mytopic
+  "auto.create": true
+  "auto.evolve": true
+
+---
+apiVersion: v1
+data:
+  schema_registry_url: http://kafka-schema-registry:8081
+kind: ConfigMap
+metadata:
+  name: connectors
+---
+apiVersion: v1
+data:
+  postgres_connection_string: amRiYzpwb3N0Z3Jlc3FsOi8vcG9zdGdyZXM6NTQzMi9wb3N0Z3Jlc2RiP3VzZXI9cG9zdGdyZXNhZG1pbiZwYXNzd29yZD1hZG1pbjEyMw==
+kind: Secret
+metadata:
+  name: connectors
