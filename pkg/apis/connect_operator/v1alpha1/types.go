@@ -62,12 +62,12 @@ func (i *ConfigItem) UnmarshalJSON(data []byte) error {
 
 type ConfigItem struct {
 	Value     interface{} `json:"-"`
-	ValueFrom *ValueFrom  `json:"valueFrom"`
+	ValueFrom *ValueFrom  `json:"_"`
 }
 
 type ValueFrom struct {
-	Secret    *Ref `json:"secret"`
-	ConfigMap *Ref `json:"configMap"`
+	Secret    *Ref `json:"secretRef"`
+	ConfigMap *Ref `json:"configMapRef"`
 }
 
 type Ref struct {
