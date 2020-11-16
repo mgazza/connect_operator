@@ -92,7 +92,7 @@ func (c *connectClient) PutConfig(name string, config interface{}) (map[string]i
 		return nil, err
 	}
 
-	if resp.StatusCode == http.StatusOK {
+	if resp.StatusCode == http.StatusOK || resp.StatusCode == http.StatusCreated {
 		return unmarshalResult(body, nil)
 	}
 
