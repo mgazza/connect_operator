@@ -21,12 +21,13 @@ import (
 	myInformers "connect_operator/pkg/generated/informers/externalversions"
 	"connect_operator/pkg/signals"
 	"flag"
+	"os"
+	"time"
+
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/klog/v2"
-	"os"
-	"time"
 )
 
 var (
@@ -60,10 +61,14 @@ func main() {
 	informerFactory := informers.NewSharedInformerFactory(kubeClientSet, time.Second*30)
 	mgazzaInformerFactory := myInformers.NewSharedInformerFactory(mgazzaClientSet, time.Second*30)
 
+	connectClient, err := NewConnectClient(connectBaseURL)
+	if err != nil {
+		klog.Fatalf("Error building connect client %s", err.Error())
+	}
 	controller := NewController(kubeClientSet,
 		mgazzaClientSet,
 		mgazzaInformerFactory.Mgazza().V1alpha1().Connectors(),
-		NewConnectClient(connectBaseURL),
+		connectClient,
 	)
 
 	// notice that there is no need to run Start methods in a separate goroutine. (i.e. go kubeInformerFactory.Start(stopCh)

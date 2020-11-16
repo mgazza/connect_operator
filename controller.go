@@ -19,9 +19,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/go-test/deep"
 	errors2 "github.com/pkg/errors"
-	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -57,9 +58,9 @@ const (
 )
 
 type ConnectClient interface {
-	GetConfig(name string) (map[string]string, error)
+	GetConfig(name string) (map[string]interface{}, error)
 	Delete(name string) error
-	PutConfig(name string, config interface{}) (map[string]string, error)
+	PutConfig(name string, config interface{}) (map[string]interface{}, error)
 }
 
 // Controller is the controller implementation for Connector resources
@@ -284,19 +285,21 @@ func (c *Controller) syncHandler(key string) error {
 			c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusPending)
 			return err
 		}
+		c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusApplied)
 	}
-
-	c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusApplied)
 	return nil
 }
 
-func (c Controller) buildConnectorConfig(ctx context.Context, namespace string, config *connectoperatorv1alpha1.ConnectorConfig) (map[string]string, error) {
-	result := map[string]string{}
+func (c Controller) buildConnectorConfig(ctx context.Context, namespace string, config *connectoperatorv1alpha1.ConnectorConfig) (map[string]interface{}, error) {
+	result := map[string]interface{}{}
 
 	var m map[string]connectoperatorv1alpha1.ConfigItem = *config
 	for k, v := range m {
 		if v.Value != "" {
 			result[k] = v.Value
+			continue
+		}
+		if v.ValueFrom == nil {
 			continue
 		}
 		if v.ValueFrom.ConfigMap != nil {
