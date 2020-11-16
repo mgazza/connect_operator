@@ -276,7 +276,9 @@ func (c *Controller) syncHandler(key string) error {
 			c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusPending)
 			return err
 		}
-		c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusApplied)
+		if connector.Status.Applied != connectoperatorv1alpha1.ConnectorStatusApplied {
+			c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusApplied)
+		}
 	}
 	return nil
 }
@@ -286,7 +288,7 @@ func (c Controller) buildConnectorConfig(ctx context.Context, namespace string, 
 
 	var m map[string]connectoperatorv1alpha1.ConfigItem = *config
 	for k, v := range m {
-		if v.Value != "" {
+		if v.Value != nil {
 			result[k] = v.Value
 			continue
 		}
