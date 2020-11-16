@@ -48,15 +48,6 @@ import (
 
 const controllerAgentName = "ksql-manager"
 
-const (
-	// SuccessSynced is used as part of the Event 'reason' when a Connector is synced
-	SuccessSynced = "Synced"
-
-	// MessageResourceSynced is the message used for an Event fired when a Connector
-	// is synced successfully
-	MessageResourceSynced = "Connector synced successfully"
-)
-
 type ConnectClient interface {
 	GetConfig(name string) (map[string]interface{}, error)
 	Delete(name string) error
@@ -344,21 +335,21 @@ func (c *Controller) enqueueConnector(obj interface{}) {
 	c.workqueue.Add(key)
 }
 
-func (h *Controller) setManagedResourceStatus(connector *connectoperatorv1alpha1.Connector, status connectoperatorv1alpha1.ResourceStatus) {
+func (c *Controller) setManagedResourceStatus(connector *connectoperatorv1alpha1.Connector, status connectoperatorv1alpha1.ResourceStatus) {
 	cp := connector.DeepCopy()
 	cp.Status.Applied = status
-	err := h.updateConnectorStatus(cp)
+	err := c.updateConnectorStatus(cp)
 	if err != nil {
 		utilruntime.HandleError(fmt.Errorf("error updating status: %v", err))
 	}
 }
 
-func (h *Controller) updateConnectorStatus(connector *connectoperatorv1alpha1.Connector) error {
+func (c *Controller) updateConnectorStatus(connector *connectoperatorv1alpha1.Connector) error {
 	// If the CustomResourceSubResources feature gate is not enabled,
 	// we must use Update instead of UpdateStatus to update the Status block of the Connector resource.
 	// UpdateStatus will not allow changes to the Spec of the resource,
 	// which is ideal for ensuring nothing other than resource status has been updated.
-	_, err := h.clientSet.MgazzaV1alpha1().Connectors(connector.Namespace).
+	_, err := c.clientSet.MgazzaV1alpha1().Connectors(connector.Namespace).
 		UpdateStatus(context.Background(), connector, metav1.UpdateOptions{})
 	return err
 }
