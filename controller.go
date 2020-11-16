@@ -113,7 +113,10 @@ func NewController(
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: controller.enqueueConnector,
 			UpdateFunc: func(old, new interface{}) {
-				controller.enqueueConnector(new)
+				// diff and only queue on changes
+				if diff := deep.Equal(old, new); diff != nil {
+					controller.enqueueConnector(new)
+				}
 			},
 			DeleteFunc: controller.enqueueConnector,
 		})
