@@ -20,7 +20,7 @@ This directory contains kubernetes resources used by this deployment
 # Build
 This project is continuously integrated by github and produces a docker image
 ```bash 
-docker pull  docker.pkg.github.com/mgazza/connect_operator/connect_operator:latest
+docker pull ghcr.io/mgazza/connect_operator:latest
 ```
 
 # Generated resources

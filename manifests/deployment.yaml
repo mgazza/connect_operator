@@ -15,4 +15,4 @@ spec:
       serviceAccountName: connect-operator-service-account
       containers:
         - name: connect-operator
-          image: docker.pkg.github.com/mgazza/connect_operator/connect_operator:latest
+          image: ghcr.io/mgazza/connect_operator:latest
