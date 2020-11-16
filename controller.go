@@ -31,7 +31,6 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/scheme"
 	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/record"
@@ -41,7 +40,7 @@ import (
 	connectoperatorv1alpha1 "connect_operator/pkg/apis/connect_operator/v1alpha1"
 
 	clientset "connect_operator/pkg/generated/clientset/versioned"
-	samplescheme "connect_operator/pkg/generated/clientset/versioned/scheme"
+	mgazzaScheme "connect_operator/pkg/generated/clientset/versioned/scheme"
 	informers "connect_operator/pkg/generated/informers/externalversions/connect_operator/v1alpha1"
 	listers "connect_operator/pkg/generated/listers/connect_operator/v1alpha1"
 )
@@ -88,13 +87,13 @@ func NewController(
 
 	// Create event broadcaster
 	// Add sample-controller types to the default Kubernetes Scheme so Events can be
-	// logged for sample-controller types.
-	utilruntime.Must(samplescheme.AddToScheme(scheme.Scheme))
+	// logged for our types.
+	utilruntime.Must(mgazzaScheme.AddToScheme(mgazzaScheme.Scheme))
 	klog.V(4).Info("Creating event broadcaster")
 	eventBroadcaster := record.NewBroadcaster()
 	eventBroadcaster.StartStructuredLogging(0)
 	eventBroadcaster.StartRecordingToSink(&typedcorev1.EventSinkImpl{Interface: kubeClientSet.CoreV1().Events("")})
-	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
+	recorder := eventBroadcaster.NewRecorder(mgazzaScheme.Scheme, corev1.EventSource{Component: controllerAgentName})
 
 	controller := &Controller{
 		kubeclientset:    kubeClientSet,
