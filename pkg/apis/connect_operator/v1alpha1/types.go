@@ -18,6 +18,7 @@ package v1alpha1
 
 import (
 	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -46,13 +47,13 @@ type ConnectorConfig map[string]ConfigItem
 
 func (i *ConfigItem) UnmarshalJSON(data []byte) error {
 	switch data[0] {
-	case '"':
-		if err := json.Unmarshal(data, &i.Value); err != nil {
-			return err
-		}
 	case '{':
 		i.ValueFrom = &ValueFrom{}
 		if err := json.Unmarshal(data, i.ValueFrom); err != nil {
+			return err
+		}
+	default:
+		if err := json.Unmarshal(data, &i.Value); err != nil {
 			return err
 		}
 	}
@@ -60,8 +61,8 @@ func (i *ConfigItem) UnmarshalJSON(data []byte) error {
 }
 
 type ConfigItem struct {
-	Value     string     `json:"-"`
-	ValueFrom *ValueFrom `json:"valueFrom"`
+	Value     interface{} `json:"-"`
+	ValueFrom *ValueFrom  `json:"valueFrom"`
 }
 
 type ValueFrom struct {
