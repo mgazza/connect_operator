@@ -249,6 +249,7 @@ func (c *Controller) syncHandler(key string) error {
 	config, err := c.buildConnectorConfig(context.Background(), namespace, &connector.Config)
 	if err != nil {
 		c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusFailed)
+		c.recorder.Event(connector, corev1.EventTypeWarning, "InvalidConfig", err.Error())
 		return nil // return nil dont reprocess
 	}
 
@@ -259,14 +260,17 @@ func (c *Controller) syncHandler(key string) error {
 		if err != nil {
 			// requeue for processing
 			c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusPending)
+			c.recorder.Event(connector, corev1.EventTypeWarning, "ErrorCallingConnectAPI", err.Error())
 			return err
 		}
 
 		c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusApplied)
+		c.recorder.Event(connector, corev1.EventTypeNormal, "ConfigApplied", "Connector applied")
 		return nil
 
 	} else if err != nil {
 		c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusPending)
+		c.recorder.Event(connector, corev1.EventTypeWarning, "ErrorCallingConnectAPI", err.Error())
 		return err
 	}
 
@@ -277,11 +281,15 @@ func (c *Controller) syncHandler(key string) error {
 		if err != nil {
 			// queue for reprocessing
 			c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusPending)
+			c.recorder.Event(connector, corev1.EventTypeWarning, "ErrorCallingConnectAPI", err.Error())
 			return err
 		}
 		if connector.Status.Applied != connectoperatorv1alpha1.ConnectorStatusApplied {
 			c.setManagedResourceStatus(connector, connectoperatorv1alpha1.ConnectorStatusApplied)
+			c.recorder.Event(connector, corev1.EventTypeNormal, "ConfigApplied", "Connector applied")
 		}
+	} else {
+		c.recorder.Event(connector, corev1.EventTypeNormal, "ConfigApplied", "No differences since last update")
 	}
 	return nil
 }
