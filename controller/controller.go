@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package controller
 
 import (
+	"connect_operator/connectClient"
 	"context"
 	"fmt"
 	"time"
@@ -252,7 +253,7 @@ func (c *Controller) syncHandler(key string) error {
 	}
 
 	currentConfig, err := c.connectClient.GetConfig(name)
-	if err != nil && errors2.Is(err, ErrNotFound) {
+	if err != nil && errors2.Is(err, connectClient.ErrNotFound) {
 		// lets create it
 		_, err := c.connectClient.PutConfig(name, config)
 		if err != nil {
@@ -300,11 +301,11 @@ func (c Controller) buildConnectorConfig(ctx context.Context, namespace string, 
 		if v.ValueFrom.ConfigMap != nil {
 			configMap, err := c.kubeclientset.CoreV1().ConfigMaps(namespace).Get(ctx, v.ValueFrom.ConfigMap.Name, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
-				return nil, errors2.Wrap(err, fmt.Sprintf("ConfigMap refererenced by 'config.%s' was not found", k))
+				return nil, errors2.Wrap(err, fmt.Sprintf("configMap refererenced by 'config.%s' was not found", k))
 			}
 			val, ok := configMap.Data[v.ValueFrom.ConfigMap.Key]
 			if !ok {
-				return nil, errors2.Wrap(err, fmt.Sprintf("ConfigMap refererenced by 'config.%s' does not contain key %s", k, v.ValueFrom.ConfigMap.Key))
+				return nil, fmt.Errorf("configMap refererenced by 'config.%s' does not contain key %s", k, v.ValueFrom.ConfigMap.Key)
 			}
 			result[k] = val
 			continue
@@ -312,11 +313,11 @@ func (c Controller) buildConnectorConfig(ctx context.Context, namespace string, 
 		if v.ValueFrom.Secret != nil {
 			secret, err := c.kubeclientset.CoreV1().Secrets(namespace).Get(ctx, v.ValueFrom.Secret.Name, metav1.GetOptions{})
 			if errors.IsNotFound(err) {
-				return nil, errors2.Wrap(err, fmt.Sprintf("Secret refererenced by 'config.%s' was not found", k))
+				return nil, errors2.Wrap(err, fmt.Sprintf("secret refererenced by 'config.%s' was not found", k))
 			}
 			val, ok := secret.Data[v.ValueFrom.Secret.Key]
 			if !ok {
-				return nil, errors2.Wrap(err, fmt.Sprintf("Secret refererenced by 'config.%s' does not contain key %s", k, v.ValueFrom.Secret.Key))
+				return nil, fmt.Errorf("secret refererenced by 'config.%s' does not contain key %s", k, v.ValueFrom.Secret.Key)
 			}
 			result[k] = string(val)
 			continue

@@ -1,7 +1,8 @@
-package main
+package connectClient
 
 import (
 	"bytes"
+	e "connect_operator/error"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,13 +13,9 @@ import (
 )
 
 const (
-	ErrNotFound   = Error("Not Found")
-	ErrUnexpected = Error("Unexpected response")
+	ErrNotFound   = e.Error("Not Found")
+	ErrUnexpected = e.Error("Unexpected response")
 )
-
-type Error string
-
-func (e Error) Error() string { return string(e) }
 
 type connectClient struct {
 	baseURL *url.URL
