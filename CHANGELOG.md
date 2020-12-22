@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2020-12-22
+### Added
+- event recorder output to keep errors closer to the resource
+### Fixed
+- bug where no error would be produced if a key didn't exist in a referenced secret/configmap
+- CRD definition stopping updates of status
+
 ## [1.0.0] - 2020-11-16
 ### Added
 - Example [Connector](./manifests/examples/example-connector.yaml) 

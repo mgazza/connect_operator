@@ -17,6 +17,8 @@ limitations under the License.
 package main
 
 import (
+	connectClient2 "connect_operator/connectClient"
+	controller2 "connect_operator/controller"
 	clientSet "connect_operator/pkg/generated/clientset/versioned"
 	myInformers "connect_operator/pkg/generated/informers/externalversions"
 	"connect_operator/pkg/signals"
@@ -61,11 +63,11 @@ func main() {
 	informerFactory := informers.NewSharedInformerFactory(kubeClientSet, time.Second*30)
 	mgazzaInformerFactory := myInformers.NewSharedInformerFactory(mgazzaClientSet, time.Second*30)
 
-	connectClient, err := NewConnectClient(connectBaseURL)
+	connectClient, err := connectClient2.NewConnectClient(connectBaseURL)
 	if err != nil {
 		klog.Fatalf("Error building connect client %s", err.Error())
 	}
-	controller := NewController(kubeClientSet,
+	controller := controller2.NewController(kubeClientSet,
 		mgazzaClientSet,
 		mgazzaInformerFactory.Mgazza().V1alpha1().Connectors(),
 		connectClient,
