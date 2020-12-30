@@ -46,7 +46,7 @@ import (
 	listers "connect_operator/pkg/generated/listers/connect_operator/v1alpha1"
 )
 
-const controllerAgentName = "ksql-manager"
+const controllerAgentName = "connect-operator"
 
 type ConnectClient interface {
 	GetConfig(name string) (map[string]interface{}, error)
